@@ -28,6 +28,8 @@
 
 extern NSString *const XLFormTextFieldLengthPercentage;
 extern NSString *const XLFormTextFieldMaxNumberOfCharacters;
+extern NSString *const XLFormTextFieldIsChinese;
+extern NSString *const XLFormTextFieldIsIdCard;
 
 @interface XLFormTextFieldCell : XLFormBaseCell <XLFormReturnKeyProtocol>
 
@@ -36,5 +38,7 @@ extern NSString *const XLFormTextFieldMaxNumberOfCharacters;
 
 @property (nonatomic) NSNumber *textFieldLengthPercentage;
 @property (nonatomic) NSNumber *textFieldMaxNumberOfCharacters;
+@property (nonatomic) NSNumber *isChinese;
+@property (nonatomic) NSNumber *isIdCard;
 
 @end

@@ -31,6 +31,8 @@
 
 NSString *const XLFormTextFieldLengthPercentage = @"textFieldLengthPercentage";
 NSString *const XLFormTextFieldMaxNumberOfCharacters = @"textFieldMaxNumberOfCharacters";
+NSString *const XLFormTextFieldIsChinese = @"isChinese";
+NSString *const XLFormTextFieldIsIdCard = @"isIdCard";
 
 @interface XLFormTextFieldCell() <UITextFieldDelegate>
 
@@ -71,6 +73,7 @@ NSString *const XLFormTextFieldMaxNumberOfCharacters = @"textFieldMaxNumberOfCha
 {
     [self.textLabel removeObserver:self forKeyPath:@"text"];
     [self.imageView removeObserver:self forKeyPath:@"image"];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark - XLFormDescriptorCell
@@ -152,6 +155,56 @@ NSString *const XLFormTextFieldMaxNumberOfCharacters = @"textFieldMaxNumberOfCha
     [self.textField setEnabled:!self.rowDescriptor.isDisabled];
     self.textField.textColor = self.rowDescriptor.isDisabled ? [UIColor grayColor] : [UIColor blackColor];
     self.textField.font = [UIFont preferredFontForTextStyle:UIFontTextStyleBody];
+    
+    [[NSNotificationCenter defaultCenter]addObserver:self selector:@selector(textFiledEditChanged:)
+                                                name:UITextFieldTextDidChangeNotification object:self.textField];
+}
+
+- (void)textFiledEditChanged:(id)notification{
+    
+    UITextRange *selectedRange = self.textField.markedTextRange;
+    UITextPosition *position = [self.textField positionFromPosition:selectedRange.start offset:0];
+    if ([self.isChinese boolValue]) {
+        if (!position) { //// 没有高亮选择的字
+            //过滤非汉字字符
+            self.textField.text = [self filterCharactor:self.textField.text withRegex:@"[^\u4e00-\u9fa5]"];
+            
+            if (self.textField.text.length >= 4) {
+                self.textField.text = [self.textField.text substringToIndex:4];
+            }
+        }else { //有高亮文字
+            //do nothing
+        }
+    }
+    
+    if ([self.isIdCard boolValue]) {
+        if (!position) {
+            //过滤非身份证字符
+            NSString *regex = @"[a-w]";
+            self.textField.text = [self filterCharactor:self.textField.text withRegex:regex];
+            
+            regex = @"[y-z]";
+            self.textField.text = [self filterCharactor:self.textField.text withRegex:regex];
+            
+            NSCharacterSet *set2 = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+            self.textField.text = [self.textField.text stringByTrimmingCharactersInSet:set2];
+            
+            NSCharacterSet *set1 = [NSCharacterSet characterSetWithCharactersInString:@"-/:;()$&@.,?![]{}#%^*+=_\\|~<>€£¥•.,?!'\""];
+            self.textField.text = [self.textField.text stringByTrimmingCharactersInSet:set1];
+            
+            if (self.textField.text.length >= 18) {
+                self.textField.text = [self.textField.text substringToIndex:18];
+            }
+        }
+    }
+}
+
+- (NSString *)filterCharactor:(NSString *)string withRegex:(NSString *)regexStr{
+    NSString *searchText = string;
+    NSError *error = NULL;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:regexStr options:NSRegularExpressionCaseInsensitive error:&error];
+    NSString *result = [regex stringByReplacingMatchesInString:searchText options:NSMatchingReportCompletion range:NSMakeRange(0, searchText.length) withTemplate:@""];
+    return result;
 }
 
 -(BOOL)formDescriptorCellCanBecomeFirstResponder
