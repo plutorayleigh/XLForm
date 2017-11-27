@@ -242,6 +242,7 @@ NSString *const XLFormTextFieldIsIdCard = @"isIdCard";
 {
     if (_textField) return _textField;
     _textField = [UITextField autolayoutView];
+    _textField.textAlignment = NSTextAlignmentRight;
     return _textField;
 }
 
