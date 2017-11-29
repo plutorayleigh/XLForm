@@ -169,8 +169,8 @@ NSString *const XLFormTextFieldIsIdCard = @"isIdCard";
             //过滤非汉字字符
             self.textField.text = [self filterCharactor:self.textField.text withRegex:@"[^\u4e00-\u9fa5]"];
             
-            if (self.textField.text.length >= 4) {
-                self.textField.text = [self.textField.text substringToIndex:4];
+            if (self.textField.text.length >= 15) {
+                self.textField.text = [self.textField.text substringToIndex:15];
             }
         }else { //有高亮文字
             //do nothing
